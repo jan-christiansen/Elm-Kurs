@@ -37,6 +37,7 @@ module Lib
         , rectangle
         , rectangle_
         , red
+        , rgb
         , rotate
         , scale
         , segment
@@ -574,6 +575,11 @@ white =
 black : Color
 black =
     Color.black
+
+
+rgb : Int -> Int -> Int -> Color
+rgb r g b =
+    Color.rgb r g b
 
 
 image : ( Float, Float ) -> String -> Picture

@@ -1,49 +1,38 @@
-[Zurück](Nikolaus.md)
+[ZurÃ¼ck](Nikolaus.md)
 
 ---
 
-# Zum Zeichnen geometrischer Formen
+# Zeichnen geometrischer Formen
 
-Wir haben schon einige Ausdrucksmöglichkeiten gesehen.
-Ein allgemeinerer Überblick mit Beispielen:
+Wir haben schon einige MÃ¶glichkeiten kennengelernt, Formen zu zeichnen.
+Es gibt zum Beispiel die folgenden Formen.
 
-* `rectangle (30,20)`  
-  führt zu:  
+* `rectangle ( 30, 20 )`  
+  fÃ¼hrt zu:  
   ![rectangle](../images/rectangle.png)
 
 * `square 20`  
-  führt zu:  
+  fÃ¼hrt zu:  
   ![square](../images/square.png)
 
 * `circle 10`  
-  führt zu:  
+  fÃ¼hrt zu:  
   ![circle](../images/circle.png)
 
-* `oval (30,20)`  
-  führt zu:  
+* `oval ( 30, 20 )`  
+  fÃ¼hrt zu:  
   ![oval](../images/oval.png)
 
-* `path [ (0,0), (15,15), (30,-15), (40,5) ]`  
-  führt zu:  
-  ![path](../images/path.png)
+* `segment ( 0, 0 ) ( 15, 15 )`  
+  fÃ¼hrt zu:  
+  ![path](../images/segment.png)
 
 * `text "Hallo"`  
-  führt zu:  
+  fÃ¼hrt zu:  
   ![text](../images/text.png)
 
-Da außer bei (absolut positioniertem) `path` die Formen zunächst immer um den Koordinatenursprung `(0,0)` zentriert sind, ist `move` oft nützlich.
-Zum Beispiel:
-
-```elm
-scene _ _ =
-  group
-  [ rectangle (30,20)
-  , circle 10 |> move (30,10)
-  ]
-```
-![move](../images/move.png)
+Die Formen werden (auÃŸer beim `segment`) immer um den Koordinatenursprung `( 0, 0 )` zentriert. Um eine Form wir das Rechteck an einer anderen Stelle zu zeichnen, kÃ¶nnen Formen verschoben werden. Ein Teilbild kann mit Hilfe von `image |> move ( x, y )` an eine beliebige Position verschoben werden. Dabei ist `image` das Bild, das verschoben wird, und `(x,y)` die Angabe, um wie viele Pixel das Bild in `x`- bzw. `y`-Richtung verschoben wird.
 
 ---
 
 [Weiter](Re-Use.md)
-
