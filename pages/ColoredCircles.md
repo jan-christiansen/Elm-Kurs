@@ -19,14 +19,19 @@ main =
     display scene
 ```
 
-Ändern Sie Ihr Programm jetzt so ab, dass zehn Kreise mit unterschiedlichen Durchmessern gezeichnet werden.
+
 Das heißt, das Programm soll die folgende Anzeige erzeugen.
 
 ![Farbige Kreise](../images/Kreise.png)
 
+
+Statt einzeln Kreise einzufärben, kann man, um flexiber zu sein eine Verzweigung verwenden, um, abhängig von einer Bedigung, verschiedene Ergebnisse zu liefern.
+Der Ausdruck `if i == 1 then square 20 else circle 10` liefert zum Beispiel ein Quadrat, wenn `i` den Wert `1` hat und einen Kreis andernfalls.
+
+
 ---
 
-[Weiter](ColoredCircles.md)
+[Weiter](Maus.md)
 
 ---
 

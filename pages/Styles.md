@@ -15,4 +15,4 @@ Der Aufruf `rgb 40 0 0` liefert zum Beispiel ein Rot.
 
 ---
 
-[Weiter](Circles.md)
+[Weiter](Squares.md)
