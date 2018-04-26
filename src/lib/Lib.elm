@@ -13,6 +13,7 @@ module Lib
         , circle_
         , dashed
         , display
+        , displayWithMouse
           -- , displayWithState
           -- , displayWithState_
           -- , display_
@@ -56,7 +57,6 @@ module Lib
 -- "jystic/elm-font-awesome": "1.0.4 <= v < 3.0.0"
 -- import AnimationFrame
 -- import Signal.Extra
--- import Mouse
 -- import Input
 
 import Array
@@ -65,6 +65,7 @@ import Color
 import Element exposing (Element)
 import Html exposing (Html)
 import Keyboard
+import Mouse
 import Set
 import Task
 import Text
@@ -147,44 +148,62 @@ type Timing
 
 type Msg
     = Resize Window.Size
+    | Move Mouse.Position
 
 
-type Model
-    = NoSize
-    | Size Window.Size
+type alias Model =
+    { size : Maybe Window.Size, mouse : ( Float, Float ) }
 
 
 initialModel : ( Model, Cmd Msg )
 initialModel =
-    ( NoSize, Task.perform Resize Window.size )
+    ( { size = Nothing, mouse = ( 0, 0 ) }, Task.perform Resize Window.size )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     ( case msg of
         Resize size ->
-            Size size
+            { model | size = Just size }
+
+        Move pos ->
+            case model.size of
+                Nothing ->
+                    model
+
+                Just size ->
+                    { model | mouse = transform size pos }
     , Cmd.none
     )
 
 
-view : Picture -> Model -> Html Msg
-view p model =
-    case model of
-        NoSize ->
+transform : Window.Size -> Mouse.Position -> ( Float, Float )
+transform { width, height } { x, y } =
+    ( toFloat x - toFloat width / 2, toFloat y - toFloat height / 2 )
+
+
+viewMouse : (( Float, Float ) -> Picture) -> Model -> Html Msg
+viewMouse p model =
+    case model.size of
+        Nothing ->
             Html.text "Waiting for size of window"
 
-        Size { width, height } ->
-            Element.toHtml (Collage.collage width height [ p ])
+        Just { width, height } ->
+            Element.toHtml (Collage.collage width height [ p model.mouse ])
 
 
 display : Picture -> Program Never Model Msg
 display p =
+    displayWithMouse (Basics.always p)
+
+
+displayWithMouse : (( Float, Float ) -> Picture) -> Program Never Model Msg
+displayWithMouse p =
     Html.program
         { init = initialModel
-        , view = view p
+        , view = viewMouse p
         , update = update
-        , subscriptions = \_ -> Window.resizes Resize
+        , subscriptions = \_ -> Sub.batch [ Window.resizes Resize, Mouse.moves Move ]
         }
 
 
