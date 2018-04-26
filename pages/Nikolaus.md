@@ -4,7 +4,7 @@
 
 # Erste Aufgabe
 
-Vervollständige die Datei `Nikolaus.elm` so, dass das Haus des Nikolaus gezeichnet wird.
+Vervollständigen Sie die Datei `Nikolaus.elm` so, dass das Haus des Nikolaus gezeichnet wird.
 
 ```elm
 scene =
@@ -29,4 +29,4 @@ Das Ergebnis soll etwa wie folgt aussehen.
 
 ---
 
-([Datei](https://raw.githubusercontent.com/jan-christiansen/Elm-Kurs/master/src/task01/Nikolaus.elm))
+[Datei](https://raw.githubusercontent.com/jan-christiansen/Elm-Kurs/master/src/task01/Nikolaus.elm)

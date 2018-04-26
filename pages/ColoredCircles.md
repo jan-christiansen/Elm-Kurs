@@ -2,7 +2,12 @@
 
 ---
 
-# Dritte Aufgabe
+# Fünfte Aufgabe
+
+Ändern Sie Ihr Programm jetzt so ab, dass zehn Kreise mit unterschiedlichen Durchmessern gezeichnet werden.
+Das heißt, das Programm soll die folgende Anzeige erzeugen.
+
+![Farbige Kreise](../images/Kreise.png)
 
 Passe die Datei `Circles.elm` so an, dass zehn Quadrate mit den Größen `10`, `20`, ..., `100` gezeichnet werden.
 
