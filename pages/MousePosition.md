@@ -20,13 +20,6 @@ main =
 
 ---
 
-Beispielausdr�cke zur Erinnerung:
-
-* `circle' (solid green) r`
-* `if ... then ... else ...`
-
----
-
 [Weiter](Mouse.md)
 
 ---
