@@ -4,7 +4,7 @@ module Lib
         , Event(..)
         , LineStyle
         , Picture
-        , Timing(..)
+          -- , Timing(..)
         , alpha
         , black
         , blue
@@ -14,6 +14,7 @@ module Lib
         , dashed
         , display
         , displayWithMouse
+        , displayWithTime
           -- , displayWithState
           -- , displayWithState_
           -- , display_
@@ -53,12 +54,11 @@ module Lib
 -- "Apanatshka/elm-signal-extra": "5.1.1 <= v < 6.0.0",
 -- "elm-lang/core": "2.1.0 <= v < 4.0.0",
 -- "evancz/elm-html": "3.0.0 <= v < 4.0.0",
--- "jwmerrill/elm-animation-frame": "1.0.3 <= v < 2.0.0",
 -- "jystic/elm-font-awesome": "1.0.4 <= v < 3.0.0"
--- import AnimationFrame
 -- import Signal.Extra
 -- import Input
 
+import AnimationFrame
 import Array
 import Collage
 import Color
@@ -119,15 +119,10 @@ gridsize =
 --                 [ceiling (y1 / gridsize)..floor (y2 / gridsize)]
 --         , move ( -x_, -y_ ) (Collage.filled red (Collage.circle 2))
 --         ]
-
-
-type Timing
-    = Every Float
-    | FPS Float
-    | AnimationFrame
-
-
-
+-- type Timing
+--     = Every Float
+--     | FPS Float
+--     | AnimationFrame
 -- display_ : ( Int, Int ) -> ( Int, Int ) -> (( Float, Float ) -> Float -> Picture) -> Maybe Timing -> Signal Element.Element
 -- display_ p1 p2 f =
 --     displayWithState_ p1 p2 (\p t _ -> f p t) () (\_ _ _ -> identity)
@@ -149,15 +144,18 @@ type Timing
 type Msg
     = Resize Window.Size
     | Move Mouse.Position
+    | Time Time.Time
 
 
 type alias Model =
-    { size : Maybe Window.Size, mouse : ( Float, Float ) }
+    { size : Maybe Window.Size, mouse : ( Float, Float ), time : Float }
 
 
 initialModel : ( Model, Cmd Msg )
 initialModel =
-    ( { size = Nothing, mouse = ( 0, 0 ) }, Task.perform Resize Window.size )
+    ( { size = Nothing, mouse = ( 0, 0 ), time = 0 }
+    , Task.perform Resize Window.size
+    )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -173,6 +171,9 @@ update msg model =
 
                 Just size ->
                     { model | mouse = transform size pos }
+
+        Time time ->
+            { model | time = time }
     , Cmd.none
     )
 
@@ -182,14 +183,14 @@ transform { width, height } { x, y } =
     ( toFloat x - toFloat width / 2, toFloat y - toFloat height / 2 )
 
 
-viewMouse : (( Float, Float ) -> Picture) -> Model -> Html Msg
-viewMouse p model =
+view : (( Float, Float ) -> Float -> Picture) -> Model -> Html Msg
+view p model =
     case model.size of
         Nothing ->
             Html.text "Waiting for size of window"
 
         Just { width, height } ->
-            Element.toHtml (Collage.collage width height [ p model.mouse ])
+            Element.toHtml (Collage.collage width height [ p model.mouse model.time ])
 
 
 display : Picture -> Program Never Model Msg
@@ -198,12 +199,24 @@ display p =
 
 
 displayWithMouse : (( Float, Float ) -> Picture) -> Program Never Model Msg
-displayWithMouse p =
+displayWithMouse pic =
     Html.program
         { init = initialModel
-        , view = viewMouse p
+        , view = view (\pos _ -> pic pos)
         , update = update
         , subscriptions = \_ -> Sub.batch [ Window.resizes Resize, Mouse.moves Move ]
+        }
+
+
+displayWithTime : (Float -> Picture) -> Program Never Model Msg
+displayWithTime pic =
+    Html.program
+        { init = initialModel
+        , view = view (Basics.always pic)
+        , update = update
+        , subscriptions = \_ -> Sub.batch [ Window.resizes Resize, AnimationFrame.times Time ]
+
+        -- , subscriptions = \_ -> Sub.batch [ Window.resizes Resize, Time.every (2 * Time.second) Time ]
         }
 
 
