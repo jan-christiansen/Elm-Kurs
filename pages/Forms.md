@@ -23,7 +23,7 @@ Es gibt zum Beispiel die folgenden Formen.
   führt zu:  
   ![oval](../images/oval.png)
 
-* `segment ( 0, 0 ) ( 15, 15 )`  
+* `segment ( 0, 0 ) ( 30, 30 )`  
   führt zu:  
   ![path](../images/segment.png)
 

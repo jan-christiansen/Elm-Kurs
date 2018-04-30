@@ -28,12 +28,10 @@ main =
 
 Das heißt, das Programm soll die folgende Anzeige erzeugen.
 
-![Farbige Quadrate](../images/Kreise.png)
+![Farbige Quadrate](../images/colored-squares.png)
+
+[Datei](https://raw.githubusercontent.com/jan-christiansen/Elm-Kurs/master/src/task03/ColoredSquares.elm)
 
 ---
 
 [Weiter](Functions.md)
-
----
-
-[Datei](https://raw.githubusercontent.com/jan-christiansen/Elm-Kurs/master/src/task03/ColoredSquares.elm)

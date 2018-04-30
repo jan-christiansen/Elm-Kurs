@@ -8,12 +8,10 @@
 Dabei sollen Sie die inneren fünf Kreise rot und die äußeren fünf Kreise grün färben.
 Das heißt, das Programm soll die folgende Anzeige erzeugen.
 
-![Farbige Kreise](../images/Kreise.png)
-
----
-
-[Weiter](Maus.md)
-
----
+![Farbige Kreise](../images/colored-circles.png)
 
 [Datei](https://raw.githubusercontent.com/jan-christiansen/Elm-Kurs/master/src/task05/ColoredCircles.elm)
+
+---
+
+[Weiter](MousePosition.md)

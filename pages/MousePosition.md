@@ -21,5 +21,3 @@ main =
 ---
 
 [Weiter](Mouse.md)
-
----

@@ -17,7 +17,6 @@ Nutzen Sie hierfür die Konstante `empty`, die ein leeres Bild liefert.
 
 Überleben Sie sich jetzt, an welche Position die Pupille gezeichnet werden muss, wenn die Maus sich außerhalb des Augapfels befindet.
 
-
 ---
 
-[Weiter](Eye.md)
+[Weiter](Eyes.md)

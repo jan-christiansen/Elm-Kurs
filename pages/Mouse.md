@@ -35,10 +35,8 @@ main =
     displayWithMouse scene
 ```
 
+[Datei](https://raw.githubusercontent.com/jan-christiansen/Elm-Kurs/master/src/task06/Mouse.elm)
+
 ---
 
 [Weiter](Follow.md)
-
----
-
-[Datei](https://raw.githubusercontent.com/jan-christiansen/Elm-Kurs/master/src/task06/Mouse.elm)

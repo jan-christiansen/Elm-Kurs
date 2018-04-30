@@ -19,10 +19,8 @@ main =
     display scene
 ```
 
+[Datei](https://raw.githubusercontent.com/jan-christiansen/Elm-Kurs/master/src/task04/Squares.elm)
+
 ---
 
 [Weiter](Conditionals.md)
-
----
-
-[Datei](https://raw.githubusercontent.com/jan-christiansen/Elm-Kurs/master/src/task04/Squares.elm)
