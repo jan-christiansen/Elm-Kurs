@@ -14,12 +14,14 @@ module Lib
         , dashed
         , display
         , displayWithMouse
-        , displayWithTime
+        , displayWithMouseAndTime
           -- , displayWithState
           -- , displayWithState_
           -- , display_
+        , displayWithTime
         , dotted
         , empty
+        , filledCircle
         , green
         , group
           -- , icon
@@ -180,7 +182,7 @@ update msg model =
 
 transform : Window.Size -> Mouse.Position -> ( Float, Float )
 transform { width, height } { x, y } =
-    ( toFloat x - toFloat width / 2, toFloat y - toFloat height / 2 )
+    ( toFloat x - toFloat width / 2, -(toFloat y) + toFloat height / 2 )
 
 
 view : (( Float, Float ) -> Float -> Picture) -> Model -> Html Msg
@@ -195,28 +197,26 @@ view p model =
 
 display : Picture -> Program Never Model Msg
 display p =
-    displayWithMouse (Basics.always p)
+    displayWithMouseAndTime (\_ _ -> p)
 
 
 displayWithMouse : (( Float, Float ) -> Picture) -> Program Never Model Msg
 displayWithMouse pic =
-    Html.program
-        { init = initialModel
-        , view = view (\pos _ -> pic pos)
-        , update = update
-        , subscriptions = \_ -> Sub.batch [ Window.resizes Resize, Mouse.moves Move ]
-        }
+    displayWithMouseAndTime (\pos _ -> pic pos)
 
 
 displayWithTime : (Float -> Picture) -> Program Never Model Msg
 displayWithTime pic =
+    displayWithMouseAndTime (\_ t -> pic t)
+
+
+displayWithMouseAndTime : (( Float, Float ) -> Float -> Picture) -> Program Never Model Msg
+displayWithMouseAndTime pic =
     Html.program
         { init = initialModel
-        , view = view (Basics.always pic)
+        , view = view pic
         , update = update
-        , subscriptions = \_ -> Sub.batch [ Window.resizes Resize, AnimationFrame.times Time ]
-
-        -- , subscriptions = \_ -> Sub.batch [ Window.resizes Resize, Time.every (2 * Time.second) Time ]
+        , subscriptions = \_ -> Sub.batch [ Window.resizes Resize, Mouse.moves Move, AnimationFrame.times Time ]
         }
 
 
@@ -433,6 +433,12 @@ circle =
 circle_ : LineStyle -> Float -> Picture
 circle_ s r =
     Collage.outlined s <|
+        Collage.circle r
+
+
+filledCircle : Color -> Float -> Picture
+filledCircle c r =
+    Collage.filled c <|
         Collage.circle r
 
 

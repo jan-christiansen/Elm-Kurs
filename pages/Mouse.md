@@ -37,7 +37,7 @@ main =
 
 ---
 
-[Weiter](MousePosition.md)
+[Weiter](Follow.md)
 
 ---
 
