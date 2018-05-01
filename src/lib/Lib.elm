@@ -15,13 +15,14 @@ module Lib
         , display
         , displayWithMouse
         , displayWithMouseAndTime
-          -- , displayWithState
+        , displayWithState
           -- , displayWithState_
           -- , display_
         , displayWithTime
         , dotted
         , empty
         , filledCircle
+        , filledRectangle
         , green
         , group
           -- , icon
@@ -53,15 +54,7 @@ module Lib
         , yellow
         )
 
--- "Apanatshka/elm-signal-extra": "5.1.1 <= v < 6.0.0",
--- "elm-lang/core": "2.1.0 <= v < 4.0.0",
--- "evancz/elm-html": "3.0.0 <= v < 4.0.0",
--- "jystic/elm-font-awesome": "1.0.4 <= v < 3.0.0"
--- import Signal.Extra
--- import Input
-
 import AnimationFrame
-import Array
 import Collage
 import Color
 import Element exposing (Element)
@@ -84,43 +77,48 @@ gridsize =
 
 
 -- not exported
--- makeGrid x1 y1 x2 y2 =
---     let
---         x_ =
---             (x1 + x2) / 2
---
---         xh =
---             x_ - x1
---
---         y_ =
---             (y1 + y2) / 2
---
---         yh =
---             y_ - y1
---     in
---     group
---         [ group <|
---             List.map
---                 (\i ->
---                     let
---                         x =
---                             toFloat i * gridsize - x_
---                     in
---                     path_ (dotted (Color.greyscale 0.15)) [ ( x, -yh ), ( x, yh ) ]
---                 )
---                 [ceiling (x1 / gridsize)..floor (x2 / gridsize)]
---         , group <|
---             List.map
---                 (\j ->
---                     let
---                         y =
---                             toFloat j * gridsize - y_
---                     in
---                     path_ (dotted (Color.greyscale 0.15)) [ ( -xh, y ), ( xh, y ) ]
---                 )
---                 [ceiling (y1 / gridsize)..floor (y2 / gridsize)]
---         , move ( -x_, -y_ ) (Collage.filled red (Collage.circle 2))
---         ]
+
+
+makeGrid x1 y1 x2 y2 =
+    let
+        x_ =
+            (x1 + x2) / 2
+
+        xh =
+            x_ - x1
+
+        y_ =
+            (y1 + y2) / 2
+
+        yh =
+            y_ - y1
+    in
+    group
+        [ group <|
+            List.map
+                (\i ->
+                    let
+                        x =
+                            toFloat i * gridsize - x_
+                    in
+                    path_ (dotted (Color.greyscale 0.15)) [ ( x, -yh ), ( x, yh ) ]
+                )
+                (List.range (ceiling (x1 / gridsize)) (floor (x2 / gridsize)))
+        , group <|
+            List.map
+                (\j ->
+                    let
+                        y =
+                            toFloat j * gridsize - y_
+                    in
+                    path_ (dotted (Color.greyscale 0.15)) [ ( -xh, y ), ( xh, y ) ]
+                )
+                (List.range (ceiling (y1 / gridsize)) (floor (y2 / gridsize)))
+        , move ( -x_, -y_ ) (Collage.filled red (Collage.circle 2))
+        ]
+
+
+
 -- type Timing
 --     = Every Float
 --     | FPS Float
@@ -143,41 +141,51 @@ gridsize =
 --     toScreen x1 y2_ (\_ p t s -> Collage.collage (x2_ - x1) (y2_ - y1) [ move d (f p t s) ]) []
 
 
-type Msg
+type Msg msg
     = Resize Window.Size
-    | Move Mouse.Position
-    | Time Time.Time
+    | User msg
 
 
-type alias Model =
-    { size : Maybe Window.Size, mouse : ( Float, Float ), time : Float }
+type alias Model model =
+    { size : Maybe Window.Size
+    , user : model
+    }
 
 
-initialModel : ( Model, Cmd Msg )
-initialModel =
-    ( { size = Nothing, mouse = ( 0, 0 ), time = 0 }
+wrapModel : model -> ( Model model, Cmd (Msg msg) )
+wrapModel model =
+    ( { size = Nothing, user = model }
     , Task.perform Resize Window.size
     )
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+wrapUpdate :
+    (msg -> model -> model)
+    -> Msg msg
+    -> Model model
+    -> ( Model model, Cmd (Msg msg) )
+wrapUpdate update msg model =
     ( case msg of
         Resize size ->
             { model | size = Just size }
 
-        Move pos ->
-            case model.size of
-                Nothing ->
-                    model
-
-                Just size ->
-                    { model | mouse = transform size pos }
-
-        Time time ->
-            { model | time = time }
+        User msg ->
+            { model | user = update msg model.user }
     , Cmd.none
     )
+
+
+
+-- Move pos ->
+--     case model.size of
+--         Nothing ->
+--             model
+--
+--         Just size ->
+--             { model | mouse = transform size pos }
+--
+-- Time time ->
+--     { model | time = time }
 
 
 transform : Window.Size -> Mouse.Position -> ( Float, Float )
@@ -185,38 +193,101 @@ transform { width, height } { x, y } =
     ( toFloat x - toFloat width / 2, -(toFloat y) + toFloat height / 2 )
 
 
-view : (( Float, Float ) -> Float -> Picture) -> Model -> Html Msg
-view p model =
+wrapView : (model -> Picture) -> Model model -> Html (Msg msg)
+wrapView pic model =
     case model.size of
         Nothing ->
             Html.text "Waiting for size of window"
 
         Just { width, height } ->
-            Element.toHtml (Collage.collage width height [ p model.mouse model.time ])
+            Element.toHtml
+                (Collage.collage
+                    width
+                    height
+                    [ --makeGrid 0 0 (toFloat width) (toFloat height)
+                      --,
+                      pic model.user
+                    ]
+                )
 
 
-display : Picture -> Program Never Model Msg
+type BeginnerMsg
+    = Move Mouse.Position
+    | Time Time.Time
+
+
+type alias BeginnerModel =
+    { mouse : ( Float, Float )
+    , time : Float
+    }
+
+
+beginnerModel : BeginnerModel
+beginnerModel =
+    { mouse = ( 0, 0 ), time = 0 }
+
+
+beginnerView :
+    (( Float, Float ) -> Float -> Picture)
+    -> Model BeginnerModel
+    -> Html (Msg msg)
+beginnerView pic model =
+    wrapView (\_ -> pic model.user.mouse model.user.time) model
+
+
+display : Picture -> Program Never (Model BeginnerModel) (Msg BeginnerMsg)
 display p =
     displayWithMouseAndTime (\_ _ -> p)
 
 
-displayWithMouse : (( Float, Float ) -> Picture) -> Program Never Model Msg
+displayWithMouse :
+    (( Float, Float ) -> Picture)
+    -> Program Never (Model BeginnerModel) (Msg BeginnerMsg)
 displayWithMouse pic =
     displayWithMouseAndTime (\pos _ -> pic pos)
 
 
-displayWithTime : (Float -> Picture) -> Program Never Model Msg
+displayWithTime :
+    (Float -> Picture)
+    -> Program Never (Model BeginnerModel) (Msg BeginnerMsg)
 displayWithTime pic =
     displayWithMouseAndTime (\_ t -> pic t)
 
 
-displayWithMouseAndTime : (( Float, Float ) -> Float -> Picture) -> Program Never Model Msg
+displayWithMouseAndTime :
+    (( Float, Float ) -> Float -> Picture)
+    -> Program Never (Model BeginnerModel) (Msg BeginnerMsg)
 displayWithMouseAndTime pic =
     Html.program
-        { init = initialModel
-        , view = view pic
-        , update = update
-        , subscriptions = \_ -> Sub.batch [ Window.resizes Resize, Mouse.moves Move, AnimationFrame.times Time ]
+        { init = wrapModel beginnerModel
+        , view = beginnerView pic
+        , update = wrapUpdate (\_ model -> model)
+        , subscriptions =
+            \_ ->
+                Sub.batch
+                    [ Window.resizes Resize
+                    , Mouse.moves (User << Move)
+                    , AnimationFrame.times (User << Time)
+                    ]
+        }
+
+
+displayWithState :
+    model
+    -> (model -> Picture)
+    -> (Event -> model -> model)
+    -> Program Never (Model model) (Msg Event)
+displayWithState initialModel view update =
+    Html.program
+        { init = wrapModel initialModel
+        , view = wrapView view
+        , update = wrapUpdate update
+        , subscriptions =
+            \_ ->
+                Sub.batch
+                    [ Window.resizes Resize
+                    , Mouse.clicks (Basics.always (User Click))
+                    ]
         }
 
 
@@ -311,40 +382,45 @@ displayWithMouseAndTime pic =
 type Event
     = Space
     | Left
-    | Up
     | Right
-    | Down
+    | Up
     | Click
-    | NoEvent
-    | A
-    | B
-    | C
-    | D
-    | E
-    | F
-    | G
-    | H
-    | I
-    | J
-    | K
-    | L
-    | M
-    | N
-    | O
-    | P
-    | Q
-    | R
-    | S
-    | T
-    | U
-    | V
-    | W
-    | X
-    | Y
-    | Z
 
 
 
+-- = Space
+-- | Left
+-- | Up
+-- | Right
+-- | Down
+-- | Click
+-- | NoEvent
+-- | A
+-- | B
+-- | C
+-- | D
+-- | E
+-- | F
+-- | G
+-- | H
+-- | I
+-- | J
+-- | K
+-- | L
+-- | M
+-- | N
+-- | O
+-- | P
+-- | Q
+-- | R
+-- | S
+-- | T
+-- | U
+-- | V
+-- | W
+-- | X
+-- | Y
+-- | Z
 -- not exported
 -- toScreen x1 y2 f extra_sigs ini upd mt =
 --     let
@@ -450,6 +526,12 @@ rectangle =
 rectangle_ : LineStyle -> ( Float, Float ) -> Picture
 rectangle_ s ( x, y ) =
     Collage.outlined s <|
+        Collage.rect x y
+
+
+filledRectangle : Color -> ( Float, Float ) -> Picture
+filledRectangle c ( x, y ) =
+    Collage.filled c <|
         Collage.rect x y
 
 
