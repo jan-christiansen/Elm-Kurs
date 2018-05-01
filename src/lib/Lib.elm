@@ -59,7 +59,7 @@ import Collage
 import Color
 import Element exposing (Element)
 import Html exposing (Html)
-import Keyboard
+import Keyboard exposing (KeyCode)
 import Mouse
 import Set
 import Task
@@ -287,8 +287,31 @@ displayWithState initialModel view update =
                 Sub.batch
                     [ Window.resizes Resize
                     , Mouse.clicks (Basics.always (User Click))
+                    , Keyboard.downs (User << keycodeToEvent)
                     ]
         }
+
+
+keycodeToEvent : KeyCode -> Event
+keycodeToEvent keyCode =
+    case keyCode of
+        32 ->
+            Space
+
+        37 ->
+            Left
+
+        38 ->
+            Up
+
+        39 ->
+            Right
+
+        40 ->
+            Down
+
+        _ ->
+            NoEvent
 
 
 
@@ -380,47 +403,16 @@ displayWithState initialModel view update =
 
 
 type Event
-    = Space
-    | Left
+    = Left
     | Right
     | Up
+    | Down
+    | Space
     | Click
+    | NoEvent
 
 
 
--- = Space
--- | Left
--- | Up
--- | Right
--- | Down
--- | Click
--- | NoEvent
--- | A
--- | B
--- | C
--- | D
--- | E
--- | F
--- | G
--- | H
--- | I
--- | J
--- | K
--- | L
--- | M
--- | N
--- | O
--- | P
--- | Q
--- | R
--- | S
--- | T
--- | U
--- | V
--- | W
--- | X
--- | Y
--- | Z
 -- not exported
 -- toScreen x1 y2 f extra_sigs ini upd mt =
 --     let
