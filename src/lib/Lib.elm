@@ -175,19 +175,6 @@ wrapUpdate update msg model =
     )
 
 
-
--- Move pos ->
---     case model.size of
---         Nothing ->
---             model
---
---         Just size ->
---             { model | mouse = transform size pos }
---
--- Time time ->
---     { model | time = time }
-
-
 transform : Window.Size -> Mouse.Position -> ( Float, Float )
 transform { width, height } { x, y } =
     ( toFloat x - toFloat width / 2, -(toFloat y) + toFloat height / 2 )
@@ -212,8 +199,8 @@ wrapView pic model =
 
 
 type BeginnerMsg
-    = Move Mouse.Position
-    | Time Time.Time
+    = BeginnerMove Mouse.Position
+    | BeginnerTime Time.Time
 
 
 type alias BeginnerModel =
@@ -266,8 +253,8 @@ displayWithMouseAndTime pic =
             \_ ->
                 Sub.batch
                     [ Window.resizes Resize
-                    , Mouse.moves (User << Move)
-                    , AnimationFrame.times (User << Time)
+                    , Mouse.moves (User << BeginnerMove)
+                    , AnimationFrame.times (User << BeginnerTime)
                     ]
         }
 
@@ -288,6 +275,7 @@ displayWithState initialModel view update =
                     [ Window.resizes Resize
                     , Mouse.clicks (Basics.always (User Click))
                     , Keyboard.downs (User << keycodeToEvent)
+                    , Time.every (50 * Time.millisecond) (User << Basics.always Tick)
                     ]
         }
 
@@ -409,6 +397,7 @@ type Event
     | Down
     | Space
     | Click
+    | Tick
     | NoEvent
 
 
