@@ -41,6 +41,7 @@ module Lib
         , rotate
         , scale
         , segment
+        , segment_
         , solid
         , square
         , square_
@@ -62,30 +63,22 @@ import Time
 import Window
 
 
--- not exported
+-- | not exported
 
 
+gridsize : Float
 gridsize =
     20
 
 
-
--- not exported
-
-
+makeGrid : Float -> Float -> Float -> Float -> Picture
 makeGrid x1 y1 x2 y2 =
     let
-        x_ =
-            (x1 + x2) / 2
-
         xh =
-            x_ - x1
-
-        y_ =
-            (y1 + y2) / 2
+            (x2 - x1) / 2
 
         yh =
-            y_ - y1
+            (y2 - y1) / 2
     in
     group
         [ group <|
@@ -93,22 +86,22 @@ makeGrid x1 y1 x2 y2 =
                 (\i ->
                     let
                         x =
-                            toFloat i * gridsize - x_
+                            toFloat i * gridsize
                     in
                     path_ (dotted (Color.greyscale 0.15)) [ ( x, -yh ), ( x, yh ) ]
                 )
-                (List.range (ceiling (x1 / gridsize)) (floor (x2 / gridsize)))
+                (List.range (ceiling (-xh / gridsize)) (floor (xh / gridsize)))
         , group <|
             List.map
                 (\j ->
                     let
                         y =
-                            toFloat j * gridsize - y_
+                            toFloat j * gridsize
                     in
-                    path_ (dotted (Color.greyscale 0.15)) [ ( -xh, y ), ( xh, y ) ]
+                    segment_ (dotted (Color.greyscale 0.15)) ( -xh, y ) ( xh, y )
                 )
-                (List.range (ceiling (y1 / gridsize)) (floor (y2 / gridsize)))
-        , move ( -x_, -y_ ) (Collage.filled red (Collage.circle 2))
+                (List.range (ceiling (-yh / gridsize)) (floor (yh / gridsize)))
+        , Collage.filled red (Collage.circle 2)
         ]
 
 
@@ -162,8 +155,8 @@ wrapView pic model =
                 (Collage.collage
                     width
                     height
-                    [ -- makeGrid 0 0 (toFloat width) (toFloat height)
-                      pic model.user
+                    [ makeGrid 0 0 (toFloat width) (toFloat height)
+                    , pic model.user
                     ]
                 )
 
@@ -323,7 +316,13 @@ filledRectangle c ( x, y ) =
 
 segment : ( Float, Float ) -> ( Float, Float ) -> Picture
 segment p1 p2 =
-    path [ p1, p2 ]
+    segment_ Collage.defaultLine p1 p2
+
+
+segment_ : LineStyle -> ( Float, Float ) -> ( Float, Float ) -> Picture
+segment_ s p1 p2 =
+    Collage.traced s <|
+        Collage.segment p1 p2
 
 
 path : List ( Float, Float ) -> Picture
