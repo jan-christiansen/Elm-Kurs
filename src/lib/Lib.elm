@@ -4,7 +4,6 @@ module Lib
         , Event(..)
         , LineStyle
         , Picture
-          -- , Timing(..)
         , alpha
         , black
         , blue
@@ -16,8 +15,6 @@ module Lib
         , displayWithMouse
         , displayWithMouseAndTime
         , displayWithState
-          -- , displayWithState_
-          -- , display_
         , displayWithTime
         , dotted
         , empty
@@ -25,8 +22,6 @@ module Lib
         , filledRectangle
         , green
         , group
-          -- , icon
-          -- , icon_
         , image
         , move
         , ngon
@@ -61,7 +56,6 @@ import Element exposing (Element)
 import Html exposing (Html)
 import Keyboard exposing (KeyCode)
 import Mouse
-import Set
 import Task
 import Text
 import Time
@@ -118,29 +112,6 @@ makeGrid x1 y1 x2 y2 =
         ]
 
 
-
--- type Timing
---     = Every Float
---     | FPS Float
---     | AnimationFrame
--- display_ : ( Int, Int ) -> ( Int, Int ) -> (( Float, Float ) -> Float -> Picture) -> Maybe Timing -> Signal Element.Element
--- display_ p1 p2 f =
---     displayWithState_ p1 p2 (\p t _ -> f p t) () (\_ _ _ -> identity)
--- displayWithState_ : ( Int, Int ) -> ( Int, Int ) -> (( Float, Float ) -> Float -> a -> Picture) -> a -> (Event -> ( Float, Float ) -> Float -> a -> a) -> Maybe Timing -> Signal Element.Element
--- displayWithState_ ( x1, y1 ) ( x2, y2 ) f =
---     let
---         x2_ =
---             max (x1 + 1) x2
---
---         y2_ =
---             max (y1 + 1) y2
---
---         d =
---             ( toFloat (-x1 - x2_) / 2, toFloat (-y1 - y2_) / 2 )
---     in
---     toScreen x1 y2_ (\_ p t s -> Collage.collage (x2_ - x1) (y2_ - y1) [ move d (f p t s) ]) []
-
-
 type Msg msg
     = Resize Window.Size
     | User msg
@@ -191,8 +162,7 @@ wrapView pic model =
                 (Collage.collage
                     width
                     height
-                    [ --makeGrid 0 0 (toFloat width) (toFloat height)
-                      --,
+                    [ -- makeGrid 0 0 (toFloat width) (toFloat height)
                       pic model.user
                     ]
                 )
@@ -302,94 +272,6 @@ keycodeToEvent keyCode =
             NoEvent
 
 
-
--- display : ( Int, Int ) -> ( Int, Int ) -> (( Float, Float ) -> Float -> Picture) -> Maybe Timing -> Signal Element.Element
--- display p1 p2 f mt =
---     elaborateDisplay (Maybe.map (always "Zeit auf Null") mt) p1 p2 (\p t _ -> f p t) () (\_ _ _ -> identity) mt
--- displayWithState : ( Int, Int ) -> ( Int, Int ) -> (( Float, Float ) -> Float -> a -> Picture) -> a -> (Event -> ( Float, Float ) -> Float -> a -> a) -> Maybe Timing -> Signal Element.Element
--- displayWithState =
---     elaborateDisplay (Just "auf Anfang")
--- not exported
--- elaborateDisplay mr ( x1, y1 ) ( x2, y2 ) f ini upd =
---     let
---         x2_ =
---             max (x1 + 1) x2
---
---         y2_ =
---             max (y1 + 1) y2
---
---         x1_ =
---             toFloat x1
---
---         y1_ =
---             toFloat y1
---
---         x2_ =
---             toFloat x2_
---
---         y2_ =
---             toFloat y2_
---
---         grid =
---             makeGrid x1_ y1_ x2_ y2_
---
---         gridMbx =
---             Signal.mailbox False
---
---         -- value here actually irrelevant
---         gridCheck =
---             Graphics.Input.checkbox (Signal.message gridMbx.address)
---
---         restartMbx =
---             Signal.mailbox ()
---
---         restartButt =
---             case mr of
---                 Nothing ->
---                     []
---
---                 Just msg ->
---                     [ Element.spacer 10 10, Graphics.Input.button (Signal.message restartMbx.address ()) msg ]
---
---         x =
---             x2_ - x1
---
---         y =
---             y2_ - y1
---
---         d =
---             ( (-x1_ - x2_) / 2, (-y1_ - y2_) / 2 )
---
---         f_ g p t s =
---             Element.flow Element.up
---                 [ Element.flow Element.left <| Element.show p :: gridCheck g :: restartButt
---                 , Element.color (Color.greyscale 0.05) <|
---                     Element.container x y Element.middle <|
---                         Collage.collage x
---                             y
---                             ((if g then
---                                 [ grid ]
---                               else
---                                 []
---                              )
---                                 ++ [ move d (f p t s) ]
---                             )
---                 ]
---     in
---     toScreen x1
---         y2_
---         f_
---         [ Signal.map
---             (\g _ t_ state -> ( t_, { state | gridOn = g, s = upd NoEvent state.mousePos t_ state.s } ))
---             gridMbx.signal
---         , Signal.map
---             (\_ t _ state -> ( 0, { state | lastReset = t, s = ini } ))
---             restartMbx.signal
---         ]
---         ini
---         upd
-
-
 type Event
     = Left
     | Right
@@ -399,83 +281,6 @@ type Event
     | Click
     | Tick
     | NoEvent
-
-
-
--- not exported
--- toScreen x1 y2 f extra_sigs ini upd mt =
---     let
---         letters =
---             Array.fromList [ A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z ]
---     in
---     Signal.map (\( t, { gridOn, mousePos, s } ) -> f gridOn mousePos t s) <|
---         Signal.Extra.foldp_
---             (\( t, action ) ( _, state ) -> action t ((t - state.lastReset) / 1000) state)
---             (\( t, _ ) -> ( 0, { gridOn = False, mousePos = ( 0, 0 ), lastReset = t, s = ini } ))
---         <|
---             Time.timestamp <|
---                 Signal.mergeMany <|
---                     List.map (Signal.map (\event _ t_ state -> ( t_, { state | s = upd event state.mousePos t_ state.s } )))
---                         [ Signal.map (always NoEvent) <|
---                             case mt of
---                                 Nothing ->
---                                     Signal.constant 0
---
---                                 Just (Every f) ->
---                                     Time.every
---                                         (if f < 0.017 then
---                                             17
---                                          else
---                                             1000 * f
---                                         )
---
---                                 Just (FPS f) ->
---                                     Time.fps
---                                         (if f > 60 then
---                                             60
---                                          else
---                                             f
---                                         )
---
---                                 Just AnimationFrame ->
---                                     AnimationFrame.frame
---                         , Signal.map
---                             (\ks ->
---                                 case Set.toList ks of
---                                     [ 32 ] ->
---                                         Space
---
---                                     [ 37 ] ->
---                                         Left
---
---                                     [ 38 ] ->
---                                         Up
---
---                                     [ 39 ] ->
---                                         Right
---
---                                     [ 40 ] ->
---                                         Down
---
---                                     [ a ] ->
---                                         Maybe.withDefault NoEvent (Array.get (a - 65) letters)
---
---                                     _ ->
---                                         NoEvent
---                             )
---                             Keyboard.keysDown
---                         , Signal.map (always Click) Mouse.clicks
---                         ]
---                         ++ Signal.map
---                             (\( x, y ) _ t_ state ->
---                                 let
---                                     pos =
---                                         ( toFloat (x1 + x), toFloat (y2 - y) )
---                                 in
---                                 ( t_, { state | mousePos = pos, s = upd NoEvent pos t_ state.s } )
---                             )
---                             Mouse.position
---                         :: extra_sigs
 
 
 type alias Picture =
@@ -692,20 +497,3 @@ image ( x, y ) s =
 empty : Picture
 empty =
     Collage.toForm Element.empty
-
-
-
--- icon : Float -> (Color -> Int -> Html.Html) -> Picture
--- icon =
---     icon_ black
---
---
--- icon_ : Color -> Float -> (Color -> Int -> Html.Html) -> Picture
--- icon_ c s i =
---     let
---         s_ =
---             round s
---     in
---     Collage.toForm <|
---         Html.toElement s_ s_ <|
---             i c s_
