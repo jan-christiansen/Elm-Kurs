@@ -9,4 +9,4 @@ Das heißt, Sie sollen das Spiel beenden, sobald die Schlange in eines Ihrer Ele
 
 ---
 
-[Weiter](Collisions.md)
+[Weiter](Food.md)
